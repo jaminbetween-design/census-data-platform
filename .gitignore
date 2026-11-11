@@ -1,0 +1,22 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+
+# Downloaded API catalogs, progress files, and logs (logs can contain request URLs)
+data/*
+!data/README.md
+*.log
+nohup.out
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Editors and OS
+.DS_Store
+.vscode/
+.idea/

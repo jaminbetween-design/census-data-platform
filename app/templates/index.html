@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Census Data Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #2c5282;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .section h2 {
+            color: #1a365d;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .endpoint-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .endpoint {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid #2c5282;
+        }
+        
+        .endpoint code {
+            background: #edf2f7;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            color: #2c5282;
+        }
+        
+        .endpoint p {
+            margin-top: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #2c5282;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #1a365d;
+        }
+        
+        .demo-section {
+            margin-top: 2rem;
+        }
+        
+        select, input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-right: 0.5rem;
+        }
+        
+        button {
+            background: #2c5282;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        button:hover {
+            background: #1a365d;
+        }
+        
+        #results {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #edf2f7;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f0f4f8;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Census Data Platform</h1>
+        <p>Access 50+ million records of US business and demographic data</p>
+    </div>
+    
+    <div class="container">
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <h3 id="total-rows">--</h3>
+                <p>Total Records</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-states">--</h3>
+                <p>States & Territories</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-zips">--</h3>
+                <p>ZIP Codes</p>
+            </div>
+            <div class="stat-card">
+                <h3>2008-2023</h3>
+                <p>Years of Data</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🔍 Quick Data Explorer</h2>
+            <p>Try the API with a simple query:</p>
+            
+            <div class="demo-section">
+                <select id="query-type">
+                    <option value="states">State Employment Data</option>
+                    <option value="industries">Industry Breakdown</option>
+                    <option value="demographics">Demographics</option>
+                    <option value="trends">Employment Trends</option>
+                    <option value="density">Economic Density</option>
+                </select>
+                
+                <select id="year-select">
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                    <option value="2019">2019</option>
+                </select>
+                
+                <button onclick="runQuery()">Run Query</button>
+            </div>
+            
+            <div id="results"></div>
+        </div>
+        
+        <div class="section">
+            <h2>📡 API Endpoints</h2>
+            <p>RESTful API endpoints for programmatic access:</p>
+            
+            <div class="endpoint-list">
+                <div class="endpoint">
+                    <code>GET /api/cbp/states?year=2023</code>
+                    <p>State-level business data (establishments, employees, payroll)</p>
+                </div>
+                <div class="endpoint">
+                    <code>GET /api/cbp/counties/{state_fips}?year=2023</code>
+                    <p>County-level business data for a specific state</p>
+                </div>
+                <div class="endpoint">
+                    <code>GET /api/cbp/industries?year=2023</code>
+                    <p>Industry breakdown by NAICS code</p>
+                </div>
+                <div class="endpoint">
+                    <code>GET /api/cbp/trends</code>
+                    <p>Employment trends over time</p>
+                </div>
+                <div class="endpoint">
+                    <code>GET /api/zbp/zipcode/{zipcode}?year=2023</code>
+                    <p>Business data for a specific ZIP code</p>
+                </div>
+                <div class="endpoint">
+                    <code>GET /api/nes/states?year=2023</code>
+                    <p>Self-employment data by state</p>
+                </div>
+                <div class="endpoint">
+                    <code>GET /api/acs/states?year=2023</code>
+                    <p>Demographics (population, income, housing)</p>
+                </div>
+                <div class="endpoint">
+                    <code>GET /api/combined/state-profile/{state_fips}</code>
+                    <p>Comprehensive state profile (all datasets)</p>
+                </div>
+            </div>
+            
+            <a href="/docs" class="btn">📖 View Full API Documentation</a>
+        </div>
+        
+        <div class="section">
+            <h2>📦 Available Datasets</h2>
+            <div id="datasets"></div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Data sourced from the U.S. Census Bureau | Free Demo Tier</p>
+    </div>
+    
+    <script>
+        // Load overview stats on page load
+        async function loadOverview() {
+            try {
+                const response = await fetch('/api/overview');
+                const data = await response.json();
+                
+                document.getElementById('total-rows').textContent = data.total_rows.toLocaleString();
+                document.getElementById('total-states').textContent = data.states;
+                document.getElementById('total-zips').textContent = data.zipcodes.toLocaleString();
+                
+                // Display datasets
+                let datasetsHtml = '<table><tr><th>Dataset</th><th>Records</th><th>Years</th></tr>';
+                data.datasets.forEach(ds => {
+                    datasetsHtml += `<tr>
+                        <td>${ds.name}</td>
+                        <td>${ds.rows.toLocaleString()}</td>
+                        <td>${ds.min_year} - ${ds.max_year}</td>
+                    </tr>`;
+                });
+                datasetsHtml += '</table>';
+                document.getElementById('datasets').innerHTML = datasetsHtml;
+            } catch (error) {
+                console.error('Error loading overview:', error);
+            }
+        }
+        
+        // Run selected query
+        async function runQuery() {
+            const queryType = document.getElementById('query-type').value;
+            const year = document.getElementById('year-select').value;
+            
+            let url;
+            switch(queryType) {
+                case 'states':
+                    url = `/api/cbp/states?year=${year}`;
+                    break;
+                case 'industries':
+                    url = `/api/cbp/industries?year=${year}`;
+                    break;
+                case 'demographics':
+                    url = `/api/acs/states?year=${year}`;
+                    break;
+                case 'trends':
+                    url = '/api/cbp/trends';
+                    break;
+                case 'density':
+                    url = `/api/combined/economic-density?year=${year}`;
+                    break;
+            }
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResults(data, queryType);
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        function displayResults(data, queryType) {
+            let html = '';
+            const items = data.data.slice(0, 15); // Show top 15
+            
+            if (queryType === 'states') {
+                html = '<table><tr><th>State</th><th>Employees</th><th>Establishments</th><th>Payroll ($M)</th></tr>';
+                items.forEach(row => {
+                    const payroll = row.annual_payroll ? (row.annual_payroll / 1000).toLocaleString() : 'N/A';
+                    html += `<tr>
+                        <td>${row.geo_name}</td>
+                        <td>${row.employees?.toLocaleString() || 'N/A'}</td>
+                        <td>${row.establishments?.toLocaleString() || 'N/A'}</td>
+                        <td>${payroll}</td>
+                    </tr>`;
+                });
+            } else if (queryType === 'industries') {
+                html = '<table><tr><th>Industry</th><th>NAICS</th><th>Employees</th><th>Establishments</th></tr>';
+                items.forEach(row => {
+                    html += `<tr>
+                        <td>${row.industry_name}</td>
+                        <td>${row.naics_code}</td>
+                        <td>${row.employees?.toLocaleString() || 'N/A'}</td>
+                        <td>${row.establishments?.toLocaleString() || 'N/A'}</td>
+                    </tr>`;
+                });
+            } else if (queryType === 'demographics') {
+                html = '<table><tr><th>State</th><th>Population</th><th>Median Income</th><th>Median Age</th></tr>';
+                items.forEach(row => {
+                    html += `<tr>
+                        <td>${row.geo_name}</td>
+                        <td>${row.total_population?.toLocaleString() || 'N/A'}</td>
+                        <td>$${row.median_household_income?.toLocaleString() || 'N/A'}</td>
+                        <td>${row.median_age || 'N/A'}</td>
+                    </tr>`;
+                });
+            } else if (queryType === 'trends') {
+                html = '<table><tr><th>Year</th><th>Employees</th><th>Establishments</th><th>Payroll ($B)</th></tr>';
+                items.forEach(row => {
+                    const payroll = row.annual_payroll ? (row.annual_payroll / 1000000).toFixed(1) : 'N/A';
+                    html += `<tr>
+                        <td>${row.vintage}</td>
+                        <td>${row.employees?.toLocaleString() || 'N/A'}</td>
+                        <td>${row.establishments?.toLocaleString() || 'N/A'}</td>
+                        <td>${payroll}</td>
+                    </tr>`;
+                });
+            } else if (queryType === 'density') {
+                html = '<table><tr><th>State</th><th>Population</th><th>Employees</th><th>Self-Employed</th><th>Density</th></tr>';
+                items.forEach(row => {
+                    html += `<tr>
+                        <td>${row.geo_name}</td>
+                        <td>${row.total_population?.toLocaleString() || 'N/A'}</td>
+                        <td>${row.employees?.toLocaleString() || 'N/A'}</td>
+                        <td>${row.self_employed?.toLocaleString() || 'N/A'}</td>
+                        <td>${row.density}</td>
+                    </tr>`;
+                });
+            }
+            
+            html += '</table>';
+            if (data.data.length > 15) {
+                html += `<p style="margin-top: 1rem; color: #666;">Showing 15 of ${data.data.length} results</p>`;
+            }
+            
+            document.getElementById('results').innerHTML = html;
+        }
+        
+        // Load data on page load
+        loadOverview();
+    </script>
+</body>
+</html>
